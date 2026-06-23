@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 
 qiime demux emp-paired \
-  --i-seqs               seqs.qza \
+  --i-seqs              4_qza/seqz.qza \
   --m-barcodes-file      sample-metadata.tsv \
   --m-barcodes-column    barcode-sequence \
   --p-rev-comp-mapping-barcodes \
-  --o-per-sample-sequences demux-full.qza \
-  --o-error-correction-details demux-details.qza
-# --i-seqs                      : artefato com as reads multiplexadas
+  --o-per-sample-sequences 4_qza/demux-full.qza \
+  --o-error-correction-details 4_qza/demux-details.qza
+# --i-seqs                      : artefato com as reads mult iplexadas
 # --m-barcodes-file             : arquivo de metadados com os barcodes por amostra
 # --m-barcodes-column           : coluna do TSV que contém as sequências de barcode
 # --p-rev-comp-mapping-barcodes : os barcodes no arquivo estão no complemento reverso
