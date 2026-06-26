@@ -77,7 +77,11 @@ process_radtags \
 # 87.7% retained reads → Bear_Paw_1.fq, Bear_Paw_2.fq ... Rabbit_Slough_8.fq
 
 # Ver reads por amostra
-rm
+for f in demux/*.fq.gz; do
+    n=$(zcat "$f" | wc -l)
+    echo "$(basename $f .fq.gz): $(( n/4 )) reads"
+done
+
 
 # -----------------------------------------------------------------------------
 # MÓDULO 3 — CONTROLE DE QUALIDADE
@@ -105,11 +109,11 @@ mkdir -p 2_demux_sub
 for f in 2_demux/Bear_Paw_*.fq 2_demux/Rabbit_Slough_*.fq; do
     sample=$(basename $f)
     echo "Subsampling $sample..."
-    seqtk sample -s 42 $f 50000 > 2_demux_sub/$sample
+    seqtk sample -s 42 $f 50000 > 2_demux/subsample/$sample
 done
 
 # Verificar contagens
-for f in 2_demux_sub/*.fq; do
+for f in 2_demux/subsample/*.fq; do
     echo -n "$(basename $f): "
     awk 'END{print NR/4}' $f
 done
@@ -126,7 +130,8 @@ nano 1_seqs/popmap.txt
 # Rabbit_Slough_8   Rabbit_Slough
 
 # Verificar tabs e conteúdo
-cat -A 1_seqs/popmap.txt | head -3
+cat -A popmap_completo.txt | head -3
+
 # Bear_Paw_1^IBear_Paw$
 # O popmap associa cada amostra à sua população
 cat 1_seqs/popmap.txt
@@ -144,9 +149,10 @@ cat 1_seqs/popmap.txt
 denovo_map.pl \
     -M 2 \
     -n 1 \
+    -m 3 \
     -T 2 \
-    --samples 2_demux_sub \
-    --popmap 1_seqs/popmap_completo.txt \
+    --samples 2_demux/subsample \
+    --popmap popmap_completo.txt \
     -o 4_stacks \
     -X "gstacks:--kmer-length 15" \
     2>&1 | tee 4_stacks/denovo_map.log
@@ -174,10 +180,10 @@ grep "loci assembled" 4_stacks/denovo_map.log
 
 populations \
     -P 4_stacks \
-    --popmap 1_seqs/popmap_completo.txt \
-    -O 4_stacks/populations_res_final \
+    --popmap popmap_completo.txt \
+    -O 4_stacks/ \
     --threads 2 \
-    -r 0.5 \
+    -r 0.75 \
     -p 2 \
     --min-maf 0.05 \
     --max-obs-het 0.80 \
